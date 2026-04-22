@@ -1,44 +1,52 @@
-import { Given, When, Then } from "@cucumber/cucumber";
-import { expect } from "chai";
-import { Builder, WebDriver } from "selenium-webdriver";
-import { SauceDemoLoginPage } from "./saucedemo_login.page";
-import { SauceDemoInventoryPage } from "./saucedemo_inventory.page";
+import {
+  Given,
+  Then,
+  After,
+  Before,
+  setDefaultTimeout,
+} from "@cucumber/cucumber";
+import { chromium, Browser, Page } from "playwright";
+import { loginToSauceDemo } from "./loginPage_methods";
+import {
+  verifyInventoryPage,
+  openBackpackDetailsAndVerify,
+  clickAddToCartButton,
+} from "./inventoryPage_methods";
 
-let driver: WebDriver;
-let loginPage: SauceDemoLoginPage;
+let browser: Browser;
+let page: Page;
 
-Given("I am on the SauceDemo login page", async function () {
-  driver = await new Builder().forBrowser("chrome").build();
-  loginPage = new SauceDemoLoginPage(driver);
-  await loginPage.open();
+setDefaultTimeout(60 * 1000);
+
+Before(async function () {
+  browser = await chromium.launch();
+  page = await browser.newPage();
+});
+Given(
+  "I am logged in to Sauce Demo with username {string} and password {string}",
+  async function (username: string, password: string) {
+    await loginToSauceDemo(page, username, password);
+  },
+);
+
+Then("I should see the inventory page with 6 products", async function () {
+  await verifyInventoryPage(page);
 });
 
-When("I enter valid credentials", async function () {
-  await loginPage.enterCredentials("standard_user", "secret_sauce");
-});
+Then(
+  "I open Sauce Labs Backpack details and verify product details",
+  async function () {
+    await openBackpackDetailsAndVerify(page);
+  },
+);
+Then(
+  "I click the 'Add to cart' button on the product details page",
+  async function () {
+    await clickAddToCartButton(page);
+  },
+);
 
-When("I click the login button", async function () {
-  await loginPage.clickLogin();
-});
-
-Then("I should be redirected to the inventory page", async function () {
-  const atInventory = await loginPage.isAtInventoryPage();
-  expect(atInventory).to.be.true;
-  await driver.quit();
-});
-
-Then("the inventory should display {int} items", async function (count) {
-  const actual = await loginPage.getInventoryItemCount();
-  expect(actual).to.equal(count);
-  await driver.quit();
-});
-
-Then("I open the details page for the Sauce Labs Backpack", async function () {
-  const inventoryPage = new SauceDemoInventoryPage(driver);
-  await inventoryPage.openBackpackDetails();
-  const itemName = await driver
-    .findElement({ xpath: "//div[@class='inventory_details_name large_size']" })
-    .getText();
-  console.log(`Opened details page for: ${itemName}`);
-  await driver.quit();
+After(async function () {
+  if (page) await page.close();
+  if (browser) await browser.close();
 });

@@ -1,8 +1,7 @@
-Feature: Inventory display on SauceDemo
+Feature: SauceDemo Login
 
-	@inventory
-	Scenario: Inventory page shows 6 items after login
-		Given I am on the SauceDemo login page
-		When I enter valid credentials
-		And I click the login button
-		Then the inventory should display 6 items
+  Scenario: User logs in successfully
+    Given I am logged in to Sauce Demo with username "standard_user" and password "secret_sauce"
+    Then I should see the inventory page with 6 products
+    Then I open Sauce Labs Backpack details and verify product details
+    Then I click the 'Add to cart' button on the product details page
