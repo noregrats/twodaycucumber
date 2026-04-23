@@ -11,10 +11,14 @@ import {
   verifyInventoryPage,
   openBackpackDetailsAndVerify,
   clickAddToCartButton,
+  getCartBadgeCount,
+  goToCheckoutPage,
 } from "./inventoryPage_methods";
+import { assertItemNameMatchesCheckout } from "./checkoutPage_methods";
 
 let browser: Browser;
 let page: Page;
+let selectedItemName = "";
 
 setDefaultTimeout(60 * 1000);
 
@@ -22,6 +26,7 @@ Before(async function () {
   browser = await chromium.launch();
   page = await browser.newPage();
 });
+
 Given(
   "I am logged in to Sauce Demo with username {string} and password {string}",
   async function (username: string, password: string) {
@@ -36,15 +41,34 @@ Then("I should see the inventory page with 6 products", async function () {
 Then(
   "I open Sauce Labs Backpack details and verify product details",
   async function () {
-    await openBackpackDetailsAndVerify(page);
+    selectedItemName = await openBackpackDetailsAndVerify(page);
+    console.log(
+      `Verified product details for Sauce Labs Backpack: Name - ${selectedItemName}`,
+    );
   },
 );
+
 Then(
   "I click the 'Add to cart' button on the product details page",
   async function () {
     await clickAddToCartButton(page);
   },
 );
+
+Then("I should see the cart badge with count 1", async function () {
+  const badgeCount = await getCartBadgeCount(page);
+  if (badgeCount !== 1) {
+    throw new Error(`Expected cart badge count to be 1, but got ${badgeCount}`);
+  }
+});
+
+Then("I go to the checkout page", async function () {
+  await goToCheckoutPage(page);
+});
+
+Then("selected item name should match checkout item name", async function () {
+  await assertItemNameMatchesCheckout(page, selectedItemName);
+});
 
 After(async function () {
   if (page) await page.close();
