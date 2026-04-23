@@ -1,6 +1,5 @@
 import { Page } from "playwright";
 
-// ...existing code...
 export async function verifyInventoryPage(page: Page): Promise<void> {
   await page.waitForURL("**/inventory.html");
 

@@ -14,7 +14,11 @@ import {
   getCartBadgeCount,
   goToCheckoutPage,
 } from "./inventoryPage_methods";
-import { assertItemNameMatchesCheckout } from "./checkoutPage_methods";
+import {
+  assertItemNameMatchesCheckout,
+  proceedToCheckoutAndFillRandomInfo,
+  finishCheckoutAndVerifySuccess,
+} from "./checkoutPage_methods";
 
 let browser: Browser;
 let page: Page;
@@ -68,6 +72,17 @@ Then("I go to the checkout page", async function () {
 
 Then("selected item name should match checkout item name", async function () {
   await assertItemNameMatchesCheckout(page, selectedItemName);
+});
+
+Then("I proceed to checkout and fill in random information", async function () {
+  const { firstName, lastName, zipCode } =
+    await proceedToCheckoutAndFillRandomInfo(page);
+  console.log(
+    `Filled checkout info: First Name - ${firstName}, Last Name - ${lastName}, ZIP Code - ${zipCode}`,
+  );
+});
+Then("I finish checkout and verify success", async function () {
+  await finishCheckoutAndVerifySuccess(page);
 });
 
 After(async function () {
