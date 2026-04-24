@@ -2,7 +2,6 @@ import { Page } from "playwright";
 
 export async function getCheckoutItemNames(page: Page): Promise<string[]> {
   const itemNamesLocator = page.locator(".cart_item .inventory_item_name");
-
   await itemNamesLocator.first().waitFor({ state: "visible" });
 
   const itemNames = await itemNamesLocator.allTextContents();
@@ -54,6 +53,7 @@ export async function proceedToCheckoutAndFillRandomInfo(
 
   return { firstName, lastName, zipCode };
 }
+
 export async function finishCheckoutAndVerifySuccess(
   page: Page,
 ): Promise<void> {
@@ -64,11 +64,7 @@ export async function finishCheckoutAndVerifySuccess(
   await successHeader.waitFor({ state: "visible" });
 
   const message = (await successHeader.textContent())?.trim();
-  if (!message) {
-    throw new Error("Success message is not displayed after clicking Finish.");
-  }
-
-  if (!/thank you for your order!/i.test(message)) {
-    throw new Error(`Unexpected success message: "${message}"`);
+  if (!message || !/thank you for your order!/i.test(message)) {
+    throw new Error(`Unexpected success message: "${message ?? ""}"`);
   }
 }

@@ -24,7 +24,7 @@ let browser: Browser;
 let page: Page;
 let selectedItemName = "";
 
-setDefaultTimeout(60 * 1000);
+setDefaultTimeout(20 * 1000);
 
 Before(async function () {
   browser = await chromium.launch();

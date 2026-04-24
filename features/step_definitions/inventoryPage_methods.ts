@@ -14,6 +14,39 @@ export async function verifyInventoryPage(page: Page): Promise<void> {
   }
 }
 
+export async function sortProductsByPriceLowToHigh(page: Page): Promise<void> {
+  const sortDropdown = page
+    .locator("select.product_sort_container, .product_sort_container select")
+    .first();
+  await sortDropdown.waitFor({ state: "visible" });
+  await sortDropdown.selectOption("lohi");
+
+  const selectedValue = await sortDropdown.inputValue();
+  if (selectedValue !== "lohi") {
+    throw new Error(
+      `Failed to sort products by price low to high. Selected value: ${selectedValue}`,
+    );
+  }
+}
+
+export async function addFirstTwoSortedProductsToCart(
+  page: Page,
+): Promise<void> {
+  const addToCartButtons = page.locator(
+    ".inventory_item button:has-text('Add to cart')",
+  );
+  const availableButtons = await addToCartButtons.count();
+
+  if (availableButtons < 2) {
+    throw new Error(
+      `Expected at least 2 add-to-cart buttons, but found ${availableButtons}`,
+    );
+  }
+
+  await addToCartButtons.nth(0).click();
+  await addToCartButtons.nth(1).click();
+}
+
 export async function openBackpackDetailsAndVerify(
   page: Page,
 ): Promise<string> {
