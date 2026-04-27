@@ -31,20 +31,30 @@ export async function sortProductsByPriceLowToHigh(page: Page): Promise<void> {
 
 export async function addFirstTwoSortedProductsToCart(
   page: Page,
-): Promise<void> {
-  const addToCartButtons = page.locator(
-    ".inventory_item button:has-text('Add to cart')",
-  );
-  const availableButtons = await addToCartButtons.count();
+): Promise<string[]> {
+  const inventoryItems = page.locator(".inventory_item");
+  const availableCount = await inventoryItems.count();
 
-  if (availableButtons < 2) {
+  if (availableCount < 2) {
     throw new Error(
-      `Expected at least 2 add-to-cart buttons, but found ${availableButtons}`,
+      `Expected at least 2 inventory items, but found ${availableCount}`,
     );
   }
 
-  await addToCartButtons.nth(0).click();
-  await addToCartButtons.nth(1).click();
+  const names: string[] = [];
+  for (let i = 0; i < 2; i++) {
+    const item = inventoryItems.nth(i);
+    const name = (
+      await item.locator(".inventory_item_name").textContent()
+    )?.trim();
+    if (!name) {
+      throw new Error(`Could not read name for inventory item at index ${i}`);
+    }
+    names.push(name);
+    await item.locator("button:has-text('Add to cart')").click();
+  }
+
+  return names;
 }
 
 export async function openBackpackDetailsAndVerify(
