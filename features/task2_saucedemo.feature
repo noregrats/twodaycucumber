@@ -13,3 +13,5 @@ Feature: Task 2 - SauceDemo basic login
     Then I should see the cart badge with count 1 after removal
     Then I proceed to continue shopping and add one more product to cart
     Then I should see the cart badge with count 2 again
+    Then I proceed to task2 checkout and fill in random information
+    Then I finish task2 checkout and verify success

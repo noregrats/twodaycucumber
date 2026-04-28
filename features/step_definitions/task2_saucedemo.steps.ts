@@ -131,10 +131,15 @@ Then("I should see the cart badge with count 2 again", async function () {
   }
 });
 
-Then("I proceed to checkout and fill in random information", async function () {
-  await proceedToCheckoutAndFillRandomInfo(page);
+Then(
+  "I proceed to task2 checkout and fill in random information",
+  async function () {
+    await proceedToCheckoutAndFillRandomInfo(page);
+  },
+);
+Then("I finish task2 checkout and verify success", async function () {
+  await finishCheckoutAndVerifySuccess(page);
 });
-
 After(async function () {
   if (page) await page.close();
   if (browser) await browser.close();
