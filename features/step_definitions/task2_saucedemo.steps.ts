@@ -11,13 +11,11 @@ import {
   verifyInventoryPage,
   sortProductsByPriceLowToHigh,
   addFirstTwoSortedProductsToCart,
-  openBackpackDetailsAndVerify,
   clickAddToCartButton,
   getCartBadgeCount,
   goToCheckoutPage,
 } from "./inventoryPage_methods";
 import {
-  assertItemNameMatchesCheckout,
   assertItemIsNotInCheckout,
   assertCheckoutItemCount,
   assertCorrectProductsOnCheckoutOverview,
@@ -28,7 +26,6 @@ import {
 
 let browser: Browser;
 let page: Page;
-let selectedItemName = "";
 let removedItemName = "";
 let addedProductNames: string[] = [];
 
