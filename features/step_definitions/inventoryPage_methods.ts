@@ -140,3 +140,67 @@ export async function goToCheckoutPage(page: Page): Promise<void> {
   await page.locator("#continue").click();
   await page.waitForURL("**/checkout-step-two.html");
 }
+
+export async function openSidePanelAndLogout(page: Page): Promise<void> {
+  const sideMenuButton = page.locator("#react-burger-menu-btn");
+  await sideMenuButton.waitFor({ state: "visible" });
+  await sideMenuButton.click();
+
+  const logoutLink = page.locator("#logout_sidebar_link");
+  await logoutLink.waitFor({ state: "visible" });
+  await logoutLink.click();
+
+  await page.waitForURL("**/");
+
+  const loginButtonVisible = await page.locator("#login-button").isVisible();
+  if (!loginButtonVisible) {
+    throw new Error("Logout failed: login page was not displayed.");
+  }
+}
+
+export async function resetAppStateAndVerifyLocalStorageCleared(
+  page: Page,
+): Promise<void> {
+  const sideMenuButton = page.locator("#react-burger-menu-btn");
+  await sideMenuButton.waitFor({ state: "visible" });
+  await sideMenuButton.click();
+
+  const resetAppStateLink = page.locator("#reset_sidebar_link");
+  await resetAppStateLink.waitFor({ state: "visible" });
+  await resetAppStateLink.click();
+
+  await page.waitForFunction(() => {
+    const cartContents = window.localStorage.getItem("cart-contents");
+    return cartContents === null || cartContents === "[]";
+  });
+
+  const storageState = await page.evaluate(() => {
+    const entries = Object.entries(window.localStorage);
+    return {
+      length: window.localStorage.length,
+      entries,
+      cartContents: window.localStorage.getItem("cart-contents"),
+    };
+  });
+
+  const cartCleared =
+    storageState.cartContents === null || storageState.cartContents === "[]";
+
+  // SauceDemo/backtrace can keep telemetry keys in localStorage.
+  const meaningfulEntries = storageState.entries.filter(
+    ([key]) => !key.startsWith("backtrace-"),
+  );
+  const storageCleared =
+    meaningfulEntries.length === 0 ||
+    (meaningfulEntries.length === 1 &&
+      meaningfulEntries[0][0] === "cart-contents" &&
+      cartCleared);
+
+  if (!storageCleared) {
+    throw new Error(
+      `Reset App State did not clear localStorage. Current entries: ${JSON.stringify(
+        storageState.entries,
+      )}`,
+    );
+  }
+}
